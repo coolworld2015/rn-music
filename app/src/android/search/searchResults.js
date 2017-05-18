@@ -103,7 +103,7 @@ class SearchResults extends Component {
 			/>
         } else {
 			image = <Image
-				source={require('../../../no_image.jpg')}
+				source={require('../../../img/no_image.jpg')}
 				style={styles.img}
 			/>
 		}
