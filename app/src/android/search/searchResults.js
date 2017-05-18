@@ -2,7 +2,6 @@
 
 import React, {Component} from 'react';
 import {
-    AppRegistry,
     StyleSheet,
     Text,
     View,
@@ -11,13 +10,9 @@ import {
     ListView,
     ScrollView,
     ActivityIndicator,
-    TabBarIOS,
-    NavigatorIOS,
     TextInput,
 	BackAndroid
 } from 'react-native';
-
-import SearchDetails from './searchDetails';
 
 class SearchResults extends Component {
     constructor(props) {
@@ -48,13 +43,18 @@ class SearchResults extends Component {
 				positionY: 0
 			}
         };
-
-        this.getMovies();
+ 
     }
-
+	componentDidMount() {
+		this.getMovies();
+	}
+	
     getMovies() {
-        fetch('https://itunes.apple.com/search?media=movie&term='
-            + this.state.searchQueryHttp, {
+        fetch('https://api.spotify.com/v1/search?q=' 
+		+ this.state.searchQueryHttp +
+		'&type=artist&limit=50', {        
+			//fetch('https://itunes.apple.com/search?media=movie&term='
+            //+ this.state.searchQueryHttp, {
             method: 'get',
             headers: {
                 'Accept': 'application/json',
@@ -63,14 +63,18 @@ class SearchResults extends Component {
         })
             .then((response)=> response.json())
             .then((responseData)=> {
+				console.log(responseData)
+				let items = responseData.artists.items;
+				
                 this.setState({
-                    dataSource: this.state.dataSource.cloneWithRows(responseData.results.slice(0, 5)),
-                    resultsCount: responseData.results.length,
-                    responseData: responseData.results,
-                    filteredItems: responseData.results
+                    dataSource: this.state.dataSource.cloneWithRows(items),
+                    resultsCount: items.length,
+                    responseData: items,
+                    filteredItems: items
                 });
             })
             .catch((error)=> {
+				console.log(error)
                 this.setState({
                     serverError: true
                 });
@@ -81,45 +85,61 @@ class SearchResults extends Component {
                 });
             });
     }
-
-    pressRow1(rowData) {
-        this.props.navigator.push({
-            title: rowData.trackName,
-            component: SearchDetails,
-            passProps: {
-                pushEvent: rowData
-            }
-        });
-    }
 	
     pressRow(rowData) {
 		this.props.navigator.push({
-			index: 2,
+			index: 4,
 			data: rowData
 		});
     }
 	
     renderRow(rowData) {
+		var image;
+
+        if (rowData.images[2]) {
+            image = <Image
+				source={{uri: rowData.images[2].url}}
+				style={styles.img}
+			/>
+        } else {
+			image = <Image
+				source={require('../../../no_image.jpg')}
+				style={styles.img}
+			/>
+		}
+		
+		
         return (
             <TouchableHighlight
                 onPress={()=> this.pressRow(rowData)}
                 underlayColor='#ddd'
             >
                 <View style={styles.imgsList}>
-                    <Image
-                        source={{uri: rowData.artworkUrl100.replace('100x100bb.jpg', '500x500bb.jpg')}}
-                        style={styles.img}
-                    />
-                    <View style={{
-                        flex: 1,
-                        flexDirection: 'column',
-                        justifyContent: 'space-between'
-                    }}>
-                        <Text style={{fontWeight: 'bold', color: 'black'}}>{rowData.trackName}</Text>
-                        <Text>{rowData.releaseDate.split('-')[0]}</Text>
-                        <Text>{rowData.country}</Text>
-                        <Text>{rowData.primaryGenreName}</Text>
-                        <Text>{rowData.artistName}</Text>
+ 
+					{image}
+ 
+                    <View style={styles.textBlock}>
+                        <Text style={styles.textItemBold}>
+							{rowData.name}
+						</Text>                        
+						
+						<Text style={styles.textItemBold}>
+							{rowData.followers.total}
+						</Text>
+						{/*
+                        <Text style={styles.textItem}>
+							{rowData.releaseDate.split('-')[0]}
+						</Text>
+                        <Text style={styles.textItem}>
+							{rowData.country}
+						</Text>
+                        <Text style={styles.textItem}>
+							{rowData.primaryGenreName}
+						</Text>
+                        <Text style={styles.textItem}>
+							{rowData.artistName}
+						</Text>
+						*/}
                     </View>
                 </View>
             </TouchableHighlight>
@@ -149,10 +169,9 @@ class SearchResults extends Component {
             return;
         }
 
-        var items, positionY, recordsCount;
-        recordsCount = this.state.recordsCount;
-        positionY = this.state.positionY;
-        items = this.state.filteredItems.slice(0, recordsCount);
+        var recordsCount = this.state.recordsCount;
+        var positionY = this.state.positionY;
+        var items = this.state.filteredItems.slice(0, recordsCount);
 
         if (event.nativeEvent.contentOffset.y >= positionY - 550) {
             this.setState({
@@ -202,78 +221,48 @@ class SearchResults extends Component {
         }
 
         return (
-            <View style={{flex: 1, justifyContent: 'center'}}>
-							<View style={{
-						flexDirection: 'row',
-						justifyContent: 'space-between'
-					}}>
+            <View style={styles.container}>
+				<View style={styles.header}>
 					<View>
 						<TouchableHighlight
 							onPress={()=> this.goBack()}
 							underlayColor='#ddd'
 						>
-							<Text style={{
-								fontSize: 16,
-								textAlign: 'center',
-								margin: 14,
-								fontWeight: 'bold',
-								color: 'darkblue'
-							}}>
-								 Back
+							<Text style={styles.textSmall}>
+								Back
 							</Text>
 						</TouchableHighlight>	
 					</View>
-					<View>
+					<View style={styles.itemWrap}>
 						<TouchableHighlight
 							underlayColor='#ddd'
 						>
-							<Text style={{
-								fontSize: 20,
-								textAlign: 'center',
-								margin: 10,
-								fontWeight: 'bold',
-								color: 'black'
-							}}>
+							<Text style={styles.textLarge}>
 								{this.state.searchQueryHttp}
 							</Text>
 						</TouchableHighlight>	
 					</View>						
 					<View>
 						<TouchableHighlight
-							onPress={()=> this.goBack()}
 							underlayColor='#ddd'
 						>
-							<Text style={{
-								fontSize: 16,
-								textAlign: 'center',
-								margin: 14,
-								fontWeight: 'bold',
-								color: 'darkblue'
-							}}>
-								Done 
+							<Text style={styles.textSmall}>
 							</Text>
 						</TouchableHighlight>	
 					</View>
 				</View>
 				
-                <View style={{marginTop: 0}}>
-                    <TextInput style={{
-                        height: 45,
-                        marginTop: 4,
-                        padding: 5,
-                        backgroundColor: 'whitesmoke',
-                        borderWidth: 3,
-                        borderColor: 'lightgray',
-                        borderRadius: 0,
-                    }}
-                               onChangeText={this.onChangeText.bind(this)}
-                               value={this.state.searchQuery}
-                               placeholder="Search here">
-                    </TextInput>
-
-                    {errorCtrl}
-
-                </View>
+                <View>
+                    <TextInput
+						underlineColorAndroid='rgba(0,0,0,0)'
+						onChangeText={this.onChangeText.bind(this)}
+						style={styles.textInput}
+						value={this.state.searchQuery}
+						placeholder="Search here">
+                    </TextInput>    			
+				</View>
+				
+				{errorCtrl}
 
                 {loader}
 
@@ -287,17 +276,15 @@ class SearchResults extends Component {
                     />
                 </ScrollView>
 
-                <View style={{marginBottom: 0}}>
-                    <Text style={styles.countFooter}>
-                        {this.state.resultsCount} entries were found.
-                    </Text>
-                </View>
-
+				<View>
+					<Text style={styles.countFooter}>
+						Records: {this.state.resultsCount} 
+					</Text>
+				</View>
             </View>
         )
     }
 }
-
 
 const styles = StyleSheet.create({
     imgsList: {
@@ -315,19 +302,91 @@ const styles = StyleSheet.create({
         padding: 15,
         backgroundColor: '#F5FCFF',
     },
+    img: {
+        height: 95,
+        width: 90,
+        borderRadius: 10,
+        margin: 10
+    },    
+	textBlock: {
+		flex: 1,
+		flexDirection: 'column',
+		justifyContent: 'space-between'
+    },	
+	textItemBold: {
+		fontWeight: 'bold', 
+		color: 'black'
+    },	
+	textItem: {
+		color: 'black'
+    },
+	container: {
+		flex: 1, 
+		justifyContent: 'center', 
+		backgroundColor: 'white'
+	},		
+	header: {
+		flexDirection: 'row',
+		justifyContent: 'space-between',
+		backgroundColor: '#48BBEC',
+		borderWidth: 0,
+		borderColor: 'whitesmoke'
+	},	
+	textSmall: {
+		fontSize: 16,
+		textAlign: 'center',
+		margin: 14,
+		fontWeight: 'bold',
+		color: 'white'
+	},		
+	textLarge: {
+		fontSize: 20,
+		textAlign: 'center',
+		margin: 10,
+		marginRight: 60,
+		fontWeight: 'bold',
+		color: 'white'
+	},		
+	textInput: {
+		height: 45,
+		marginTop: 0,
+		padding: 5,
+		backgroundColor: 'white',
+		borderWidth: 3,
+		borderColor: 'lightgray',
+		borderRadius: 0
+	},
+	itemWrap: {
+		flex: 1,
+		flexDirection: 'column', 
+		flexWrap: 'wrap'
+    },	
+	row: {
+		flex: 1,
+		flexDirection: 'row',
+		padding: 20,
+		alignItems: 'center',
+		borderColor: '#D7D7D7',
+		borderBottomWidth: 1,
+		backgroundColor: '#fff'
+	},		
+	rowText: {
+		backgroundColor: '#fff', 
+		color: 'black', 
+		fontWeight: 'bold'
+	},	
     countFooter: {
         fontSize: 16,
         textAlign: 'center',
         padding: 10,
         borderColor: '#D7D7D7',
-        backgroundColor: 'lightgray',
-		color: 'black'
+        backgroundColor: '#48BBEC',
+		color: 'white',
+		fontWeight: 'bold'
     },
-    img: {
-        height: 95,
-        width: 75,
-        borderRadius: 20,
-        margin: 20
+    loader: {
+		justifyContent: 'center',
+		height: 100
     },
     error: {
         color: 'red',

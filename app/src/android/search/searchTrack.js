@@ -14,10 +14,10 @@ import {
 	BackAndroid
 } from 'react-native';
 
-class SearchIMDB extends Component {
+class SearchResults extends Component {
     constructor(props) {
         super(props);
-
+		
 		BackAndroid.addEventListener('hardwareBackPress', () => {
 			if (this.props.navigator) {
 				this.props.navigator.pop();
@@ -31,27 +31,28 @@ class SearchIMDB extends Component {
 
 		this.state = {
 			dataSource: ds.cloneWithRows([])
-		}
-
+		}	
+		
 		if (props.data) {
-			this.state = {
+			this.state = {			
 				dataSource: ds.cloneWithRows([]),
-				searchQueryHttp: props.data.searchQuery,
+				searchQueryHttp: props.data.id,
 				showProgress: true,
 				resultsCount: 0,
 				recordsCount: 5,
 				positionY: 0
 			}
-		};
+        };
+ 
     }
-	
 	componentDidMount() {
 		this.getMovies();
 	}
 	
     getMovies() {
-        fetch('http://www.omdbapi.com/?t='
-            + this.state.searchQueryHttp + '&plot=full', {
+        fetch('https://api.spotify.com/v1/artists/' 
+		+ this.state.searchQueryHttp +
+		'/top-tracks?country=us', {        
             method: 'get',
             headers: {
                 'Accept': 'application/json',
@@ -60,26 +61,18 @@ class SearchIMDB extends Component {
         })
             .then((response)=> response.json())
             .then((responseData)=> {
-                if (responseData.Response == 'False') {
-                    var arr = [];
-                } else {
-                    var arr = [];
-                    arr.push(responseData);
-                    arr[0].pic = responseData.Poster;
-                    arr[0].trackName = responseData.Title;
-                    arr[0].releaseDate = responseData.Year;
-                    arr[0].country = responseData.Country;
-                    arr[0].primaryGenreName = responseData.Genre;
-                    arr[0].artistName = responseData.Director;
-                    arr[0].longDescription = responseData.Plot;
-                }
+				console.log(responseData)
+				let items = responseData.tracks;
+				
                 this.setState({
-                    dataSource: this.state.dataSource.cloneWithRows(arr),
-                    resultsCount: arr.length,
-                    responseData: arr
+                    dataSource: this.state.dataSource.cloneWithRows(items),
+                    resultsCount: items.length,
+                    responseData: items,
+                    filteredItems: items
                 });
             })
-            .catch((error)=> {	
+            .catch((error)=> {
+				console.log(error)
                 this.setState({
                     serverError: true
                 });
@@ -90,29 +83,57 @@ class SearchIMDB extends Component {
                 });
             });
     }
-
+	
     pressRow(rowData) {
 		this.props.navigator.push({
 			index: 2,
 			data: rowData
 		});
     }
-
+	
     renderRow(rowData) {
+		var image;
+
+        if (rowData.album.images[1]) {
+            image = <Image
+				source={{uri: rowData.album.images[1].url}}
+				style={styles.img}
+			/>
+        } else {
+			image = <Image
+				source={require('../../../no_image.jpg')}
+				style={styles.img}
+			/>
+		}
+		
+		
         return (
             <TouchableHighlight
                 onPress={()=> this.pressRow(rowData)}
                 underlayColor='#ddd'
             >
                 <View style={styles.imgsList}>
-                    <Image
-                        source={{uri: rowData.pic}}
-                        style={styles.img}
-                    />
+ 
+					{image}
+ 
                     <View style={styles.textBlock}>
                         <Text style={styles.textItemBold}>
-							{rowData.trackName}
+							{rowData.name}
+						</Text>                        
+						
+						<Text style={styles.textItemBold}>
+							{rowData.popularity}
 						</Text>
+						
+						<Text style={styles.textItemBold}>
+							{rowData.preview_url}
+						</Text>				
+						
+						<Text style={styles.textItemBold}>
+							{rowData.id}
+						</Text>
+						
+						{/*
                         <Text style={styles.textItem}>
 							{rowData.releaseDate.split('-')[0]}
 						</Text>
@@ -125,6 +146,7 @@ class SearchIMDB extends Component {
                         <Text style={styles.textItem}>
 							{rowData.artistName}
 						</Text>
+						*/}
                     </View>
                 </View>
             </TouchableHighlight>
@@ -158,11 +180,11 @@ class SearchIMDB extends Component {
         var positionY = this.state.positionY;
         var items = this.state.filteredItems.slice(0, recordsCount);
 
-        if (event.nativeEvent.contentOffset.y >= positionY - 110) {
+        if (event.nativeEvent.contentOffset.y >= positionY - 550) {
             this.setState({
                 dataSource: this.state.dataSource.cloneWithRows(items),
-                recordsCount: recordsCount + 3,
-                positionY: positionY + 380
+                recordsCount: recordsCount + 5,
+                positionY: positionY + 600
             });
         }
     }
@@ -223,7 +245,7 @@ class SearchIMDB extends Component {
 							underlayColor='#ddd'
 						>
 							<Text style={styles.textLarge}>
-								{this.state.searchQueryHttp}
+								{this.props.data.name}
 							</Text>
 						</TouchableHighlight>	
 					</View>						
@@ -271,7 +293,6 @@ class SearchIMDB extends Component {
     }
 }
 
-
 const styles = StyleSheet.create({
     imgsList: {
         flex: 1,
@@ -290,9 +311,9 @@ const styles = StyleSheet.create({
     },
     img: {
         height: 95,
-        width: 75,
+        width: 90,
         borderRadius: 10,
-        margin: 20
+        margin: 10
     },    
 	textBlock: {
 		flex: 1,
@@ -381,4 +402,4 @@ const styles = StyleSheet.create({
     }
 });
 
-export default SearchIMDB;
+export default SearchResults;

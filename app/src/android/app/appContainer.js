@@ -24,14 +24,13 @@ import PhoneDetails from '../phones/phoneDetails';
 
 import Search from '../search/search';
 import SearchResults from '../search/searchResults';
+import SearchDetails from '../search/searchDetails';
+import SearchIMDB from '../search/searchIMDB';
+import SearchTrack from '../search/searchTrack';
 
 class AppContainer extends Component {
     constructor(props) {
         super(props);
-    }
-
-    onLogOut() {
-        this.props.onLogOut();
     }
 
     render() {
@@ -39,10 +38,8 @@ class AppContainer extends Component {
             <ScrollableTabView
                 renderTabBar={() => <DefaultTabBar backgroundColor='white'/>}
             >
-                <PhonesTab tabLabel="Phones"/>
-                <UsersTab tabLabel="Users"/>
-                <AuditTab tabLabel="Audit"/>
-                <Logout onLogOut={this.onLogOut.bind(this)} tabLabel="Logout"/>
+                <SearchTab tabLabel="Search"/>
+                <Logout tabLabel="Logout"/>
             </ScrollableTabView>
         );
     }
@@ -52,7 +49,7 @@ class Logout extends Component {
     constructor(props) {
         super(props);
 
-        this.props.onLogOut();
+        //appConfig.onLogOut();
     }
 
     render() {
@@ -61,28 +58,30 @@ class Logout extends Component {
 }
 
 class SearchTab extends Component {
-    constructor(props) {
-        super(props);
-        this.routes = [
-            {title: 'Search', index: 0},
-            {title: 'Search Results', index: 1},
-            {title: 'Phones Details', index: 2}
-        ];
-    }
-
-    renderScene(route, navigator) {
-        switch (route.index) {
-            case 0:
-                return <Search routes={this.routes} navigator={navigator}/>;
-                break;
-            case 1:
-                return <SearchResults data={route.data} routes={this.routes} navigator={navigator}/>;
-                break;
-            case 2:
-                return <PhoneDetails data={route.data} routes={this.routes} navigator={navigator}/>;
-                break;
-        }
-    }
+	constructor(props) {
+		super(props);
+		this.routes = [
+			{title: 'Search', index: 0},
+			{title: 'Search Results', index: 1},
+			{title: 'Search Details', index: 2},
+			{title: 'Search Track', index: 3}
+		];
+	}
+		  
+	renderScene(route, navigator) {
+		switch (route.index) {
+			case 0: return <Search routes={this.routes} navigator={navigator} />
+					break;			
+			case 1: return <SearchResults data={route.data} routes={this.routes} navigator={navigator} />
+					break;			
+			case 2: return <SearchDetails data={route.data} routes={this.routes} navigator={navigator} />
+					break;	
+			case 3: return <SearchIMDB data={route.data} routes={this.routes} navigator={navigator} />
+					break;
+			case 4: return <SearchTrack data={route.data} routes={this.routes} navigator={navigator} />
+					break
+ 		}
+ 	}
 
     render() {
         return (
