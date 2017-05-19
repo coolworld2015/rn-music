@@ -14,7 +14,7 @@ import {
 	BackAndroid
 } from 'react-native';
 
-class SearchResults extends Component {
+class SearchTrack extends Component {
     constructor(props) {
         super(props);
 		
@@ -36,7 +36,7 @@ class SearchResults extends Component {
 		if (props.data) {
 			this.state = {			
 				dataSource: ds.cloneWithRows([]),
-				searchQueryHttp: props.data.id,
+				searchQueryHttp: props.data.searchQuery,
 				showProgress: true,
 				resultsCount: 0,
 				recordsCount: 5,
@@ -50,9 +50,9 @@ class SearchResults extends Component {
 	}
 	
     getMovies() {
-        fetch('https://api.spotify.com/v1/artists/' 
+        fetch('https://api.spotify.com/v1/search?q=' 
 		+ this.state.searchQueryHttp +
-		'/top-tracks?country=us', {        
+		'&type=track&market=US&limit=50', {
             method: 'get',
             headers: {
                 'Accept': 'application/json',
@@ -62,7 +62,7 @@ class SearchResults extends Component {
             .then((response)=> response.json())
             .then((responseData)=> {
 				console.log(responseData)
-				let items = responseData.tracks;
+				let items = responseData.tracks.items;
 				
                 this.setState({
                     dataSource: this.state.dataSource.cloneWithRows(items),
@@ -92,6 +92,7 @@ class SearchResults extends Component {
     }
 	
     renderRow(rowData) {
+		console.log(rowData)
 		var image;
 
         if (rowData.album.images[1]) {
@@ -105,7 +106,6 @@ class SearchResults extends Component {
 				style={styles.img}
 			/>
 		}
-		
 		
         return (
             <TouchableHighlight
@@ -122,15 +122,15 @@ class SearchResults extends Component {
 						</Text>                        
 						
 						<Text style={styles.textItemBold}>
-							{rowData.popularity}
+							{rowData.artists[0].name}
 						</Text>
 						
 						<Text style={styles.textItemBold}>
-							{rowData.preview_url}
+							 
 						</Text>				
 						
 						<Text style={styles.textItemBold}>
-							{rowData.id}
+							 
 						</Text>
 						
 						{/*
@@ -245,7 +245,7 @@ class SearchResults extends Component {
 							underlayColor='#ddd'
 						>
 							<Text style={styles.textLarge}>
-								{this.props.data.name}
+								{this.state.searchQueryHttp}
 							</Text>
 						</TouchableHighlight>	
 					</View>						
@@ -402,4 +402,4 @@ const styles = StyleSheet.create({
     }
 });
 
-export default SearchResults;
+export default SearchTrack;

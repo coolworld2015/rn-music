@@ -21,7 +21,7 @@ class Search extends Component {
             showProgress: false,
             eventSwitchTitle: true,
             eventSwitchBase: true,
-            textSwitchBase: 'Search by phone',
+            textSwitchBase: 'Search by track',
             bugANDROID: ''
         }
     }
@@ -47,24 +47,34 @@ class Search extends Component {
             });
             return;
         }
-
-        this.props.navigator.push({
-            index: 1,
-            data: {
-                searchQuery: this.state.searchQuery,
-                searchType: this.state.textSwitchBase
-            }
-        });
+		
+		if (this.state.textSwitchBase === 'Search by track') {
+			this.props.navigator.push({
+				index: 4,
+				data: {
+					searchQuery: this.state.searchQuery,
+					searchType: this.state.textSwitchBase
+				}
+			})
+		} else {
+			this.props.navigator.push({
+				index: 1,
+				data: {
+					searchQuery: this.state.searchQuery,
+					searchType: this.state.textSwitchBase
+				}
+			})
+		}
     }
 
     toggleTypeChange() {
         if (!this.state.eventSwitchBase) {
             this.setState({
-                textSwitchBase: 'Search by phone'
+                textSwitchBase: 'Search by track'
             });
         } else {
             this.setState({
-                textSwitchBase: 'Search by name'
+                textSwitchBase: 'Search by artist'
             });
         }
     }
@@ -246,7 +256,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#48BBEC',
         borderColor: '#48BBEC',
         alignSelf: 'stretch',
-        marginTop: 20,
+        marginTop: 19,
         justifyContent: 'center',
         alignItems: 'center',
         borderRadius: 5
@@ -263,6 +273,7 @@ const styles = StyleSheet.create({
     error: {
         color: 'red',
         paddingTop: 10,
+		marginBottom: -6,
         textAlign: 'center'
     }
 });
