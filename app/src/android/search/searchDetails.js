@@ -25,18 +25,20 @@ class SearchDetails extends Component {
 				this.props.navigator.pop();
 			}
 			return true;
-		});	
+		});
 		
 		this.state = {
-			pushEvent: {
-				trackName: '',
-				releaseDate: ' - '
-			}
+			name: '',
+			artist: '',
+			album: ''
 		};
 		
 		if (props.data) {
 			this.state = {
-				pushEvent: props.data
+				name: props.data.name,
+				image: props.data.image,
+				artist: props.data.artist,
+				album: props.data.album
 			};
 		}	
     }
@@ -56,7 +58,7 @@ class SearchDetails extends Component {
 
                 AsyncStorage.setItem('rn-movies.movies', JSON.stringify(movies))
                     .then(json => {
-                            App.movies.refresh = true;
+                            //App.movies.refresh = true;
                             this.props.navigator.pop();
                         }
                     );
@@ -71,30 +73,16 @@ class SearchDetails extends Component {
 	
     render() {
         var image = <View />;
-		
-		if (this.state.pushEvent) {
-			if (this.state.pushEvent.artworkUrl100) {
-				image = <Image
-					source={{uri: this.state.pushEvent.artworkUrl100.replace('100x100bb.jpg', '500x500bb.jpg')}}
-					style={{
-						height: 300,
-						width: 200,
-						borderRadius: 20,
-						margin: 20
-					}}
-				/>;
-			} else {
-				image = <Image
-					source={{uri: this.state.pushEvent.pic}}
-					style={{
-						height: 300,
-						width: 200,
-						borderRadius: 20,
-						margin: 20
-					}}
-				/>;
-			}
-		}
+ 
+		image = <Image
+			source={{uri: this.state.image}}
+			style={{
+				height: 320,
+				width: 320,
+				borderRadius: 10,
+				margin: 5
+			}}
+		/>;
 		
         return (
             <View style={styles.container}>
@@ -114,7 +102,7 @@ class SearchDetails extends Component {
 							underlayColor='#ddd'
 						>
 							<Text style={styles.textLarge}>
-								{this.state.pushEvent.trackName}
+								{this.state.name}
 							</Text>
 						</TouchableHighlight>	
 					</View>						
@@ -143,31 +131,19 @@ class SearchDetails extends Component {
 					}}>
 						{image}
 					</View>
-					
+					 
 						<Text style={styles.itemTextBold}>
-							{this.state.pushEvent.trackName}
-						</Text>
-
-						<Text style={styles.itemTextBold}>
-							{this.state.pushEvent.releaseDate.split('-')[0]}
-						</Text>
-
-						<Text style={styles.itemTextBold}>
-							{this.state.pushEvent.country}
-						</Text>
-
-						<Text style={styles.itemTextBold}>
-							{this.state.pushEvent.primaryGenreName}
-						</Text>
-
-						<Text style={styles.itemTextBold}>
-							{this.state.pushEvent.artistName}
-						</Text>
-
-						<Text style={styles.itemText}>
-							{this.state.pushEvent.longDescription}
+							{this.state.name}
 						</Text>
 						
+						<Text style={styles.itemText}>
+							{this.state.artist}
+						</Text>
+						
+						<Text style={styles.itemText}>
+							{this.state.album}
+						</Text>
+
 						<TouchableHighlight
 							onPress={()=> this.localStorageInsert()}
 							style={styles.button}>
@@ -229,12 +205,13 @@ const styles = StyleSheet.create({
         margin: 5,
         fontWeight: 'bold',
 		color: 'black'
-    },  
-	itemText: {
-		fontSize: 18,
-		padding: 20,
-		textAlign: 'center',
-		color: 'black'
+    },
+    itemText: {
+        fontSize: 14,
+        textAlign: 'center',
+        margin: 3,
+        marginLeft: 2,
+        color: 'black'
     },
     button: {
         height: 50,

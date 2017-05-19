@@ -5,7 +5,7 @@ import NavigationExperimental from 'react-native-deprecated-custom-components';
 import ScrollableTabView, {DefaultTabBar} from 'react-native-scrollable-tab-view';
 
 import Search from '../search/search';
-import SearchResults from '../search/searchResults';
+import SearchArtist from '../search/searchArtist';
 import SearchDetails from '../search/searchDetails';
 import SearchTopTrack from '../search/searchTopTrack';
 import SearchTrack from '../search/searchTrack';
@@ -21,7 +21,7 @@ class AppContainer extends Component {
                 renderTabBar={() => <DefaultTabBar backgroundColor='white'/>}
             >
                 <SearchTab tabLabel="Search"/>
-                <Logout tabLabel="Logout"/>
+                <Logout tabLabel="Tracks"/>
             </ScrollableTabView>
         );
     }
@@ -44,7 +44,7 @@ class SearchTab extends Component {
 		super(props);
 		this.routes = [
 			{title: 'Search', index: 0},
-			{title: 'Search Results', index: 1},
+			{title: 'Search Artist', index: 1},
 			{title: 'Search Details', index: 2},
 			{title: 'Search Top Track', index: 3},
 			{title: 'Search Track', index: 4}
@@ -55,7 +55,7 @@ class SearchTab extends Component {
 		switch (route.index) {
 			case 0: return <Search routes={this.routes} navigator={navigator} />
 					break;			
-			case 1: return <SearchResults data={route.data} routes={this.routes} navigator={navigator} />
+			case 1: return <SearchArtist data={route.data} routes={this.routes} navigator={navigator} />
 					break;			
 			case 2: return <SearchDetails data={route.data} routes={this.routes} navigator={navigator} />
 					break;	

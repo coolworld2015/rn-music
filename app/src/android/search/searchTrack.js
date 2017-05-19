@@ -5,13 +5,16 @@ import {
     StyleSheet,
     Text,
     View,
-    Image,
     TouchableHighlight,
+	TouchableWithoutFeedback,
     ListView,
     ScrollView,
     ActivityIndicator,
     TextInput,
-	BackAndroid
+	BackAndroid,
+	Image,
+	Dimensions,
+	RefreshControl	
 } from 'react-native';
 
 class SearchTrack extends Component {
@@ -30,7 +33,8 @@ class SearchTrack extends Component {
         });
 
 		this.state = {
-			dataSource: ds.cloneWithRows([])
+			dataSource: ds.cloneWithRows([]),
+			searchQuery: ''
 		}	
 		
 		if (props.data) {
@@ -40,19 +44,33 @@ class SearchTrack extends Component {
 				showProgress: true,
 				resultsCount: 0,
 				recordsCount: 5,
-				positionY: 0
+				positionY: 0,
+				searchQuery: '',
+				refreshing: false
 			}
         };
  
     }
-	componentDidMount() {
-		this.getMovies();
-	}
+
+    componentDidMount() {
+		this.setState({
+            width: Dimensions.get('window').width
+        });
+        this.getItems();
+    }
 	
-    getMovies() {
+    getItems() {
+		this.setState({
+			serverError: false,
+            resultsCount: 0,
+            recordsCount: 15,
+            positionY: 0,
+			searchQuery: ''
+        });
+		
         fetch('https://api.spotify.com/v1/search?q=' 
-		+ this.state.searchQueryHttp +
-		'&type=track&market=US&limit=50', {
+			+ this.state.searchQueryHttp +
+			'&type=track&market=US&limit=50', {
             method: 'get',
             headers: {
                 'Accept': 'application/json',
@@ -61,7 +79,6 @@ class SearchTrack extends Component {
         })
             .then((response)=> response.json())
             .then((responseData)=> {
-				console.log(responseData)
 				let items = responseData.tracks.items;
 				
                 this.setState({
@@ -72,7 +89,6 @@ class SearchTrack extends Component {
                 });
             })
             .catch((error)=> {
-				console.log(error)
                 this.setState({
                     serverError: true
                 });
@@ -85,14 +101,20 @@ class SearchTrack extends Component {
     }
 	
     pressRow(rowData) {
+		let data = {
+			name: rowData.name,
+			image: rowData.album.images[1].url,
+			artist: rowData.artists[0].name,
+			album: rowData.album.name
+		};
+		
 		this.props.navigator.push({
 			index: 2,
-			data: rowData
+			data: data
 		});
     }
 	
     renderRow(rowData) {
-		console.log(rowData)
 		var image;
 
         if (rowData.album.images[1]) {
@@ -121,13 +143,13 @@ class SearchTrack extends Component {
 							{rowData.name}
 						</Text>                        
 						
-						<Text style={styles.textItemBold}>
+						<Text style={styles.textItem}>
 							{rowData.artists[0].name}
 						</Text>
 						
-						<Text style={styles.textItemBold}>
+						<Text style={styles.textItem}>
 							{rowData.album.name}
-						</Text>				
+						</Text>	
                     </View>
                 </View>
             </TouchableHighlight>
@@ -135,37 +157,24 @@ class SearchTrack extends Component {
     }
 
     refreshData(event) {
-        if (this.state.showProgress == true) {
+        if (this.state.showProgress === true) {
             return;
         }
 
-        if (event.nativeEvent.contentOffset.y <= -150) {
-
-            this.setState({
-                showProgress: true,
-                resultsCount: 0,
-                recordsCount: 5,
-                positionY: 0,
-                searchQuery: ''
-            });
-            setTimeout(() => {
-                this.getMovies()
-            }, 500);
-        }
-
-        if (this.state.filteredItems == undefined) {
+        if (this.state.filteredItems === undefined) {
             return;
         }
 
-        var recordsCount = this.state.recordsCount;
-        var positionY = this.state.positionY;
-        var items = this.state.filteredItems.slice(0, recordsCount);
+        let items, positionY, recordsCount;
+        recordsCount = this.state.recordsCount;
+        positionY = this.state.positionY;
+        items = this.state.filteredItems.slice(0, recordsCount);
 
-        if (event.nativeEvent.contentOffset.y >= positionY - 550) {
+        if (event.nativeEvent.contentOffset.y >= positionY) {
             this.setState({
                 dataSource: this.state.dataSource.cloneWithRows(items),
-                recordsCount: recordsCount + 5,
-                positionY: positionY + 600
+                recordsCount: recordsCount + 10,
+                positionY: positionY + 400
             });
         }
     }
@@ -175,7 +184,7 @@ class SearchTrack extends Component {
             return;
         }
         var arr = [].concat(this.state.responseData);
-        var items = arr.filter((el) => el.trackName.toLowerCase().indexOf(text.toLowerCase()) >= 0);
+        var items = arr.filter((el) => el.name.toLowerCase().indexOf(text.toLowerCase()) >= 0);
         this.setState({
             dataSource: this.state.dataSource.cloneWithRows(items),
             resultsCount: items.length,
@@ -183,13 +192,33 @@ class SearchTrack extends Component {
             searchQuery: text
         })
     }
+
+    refreshDataAndroid() {
+        this.setState({
+            showProgress: true,
+            resultsCount: 0
+        });
+
+        this.getItems();
+    }
 	
     goBack(rowData) {
 		this.props.navigator.pop();
 	}
+
+    clearSearchQuery() {
+        this.setState({
+            dataSource: this.state.dataSource.cloneWithRows(this.state.responseData.slice(0, 15)),
+            resultsCount: this.state.responseData.length,
+            filteredItems: this.state.responseData,
+            positionY: 0,
+            recordsCount: 15,
+            searchQuery: ''
+        });
+    }
 	
     render() {
-        var errorCtrl, loader;
+        let errorCtrl, loader, image;
 
         if (this.state.serverError) {
             errorCtrl = <Text style={styles.error}>
@@ -198,15 +227,24 @@ class SearchTrack extends Component {
         }
 
         if (this.state.showProgress) {
-            loader = <View style={{
-                justifyContent: 'center',
-                height: 100
-            }}>
+            loader = <View style={styles.loader}>
                 <ActivityIndicator
                     size="large"
-                    animating={true}/>
+                    animating={true}
+                />
             </View>;
         }
+
+		if (this.state.searchQuery.length > 0) {
+			image = <Image
+				source={require('../../../img/cancel.png')}
+				style={{
+					height: 20,
+					width: 20,
+					marginTop: 10
+				}}
+			/>;
+		}
 
         return (
             <View style={styles.container}>
@@ -214,7 +252,7 @@ class SearchTrack extends Component {
 					<View>
 						<TouchableHighlight
 							onPress={()=> this.goBack()}
-							underlayColor='#ddd'
+							underlayColor='#48BBEC'
 						>
 							<Text style={styles.textSmall}>
 								Back
@@ -222,47 +260,72 @@ class SearchTrack extends Component {
 						</TouchableHighlight>	
 					</View>
 					<View style={styles.itemWrap}>
-						<TouchableHighlight
-							underlayColor='#ddd'
-						>
-							<Text style={styles.textLarge}>
-								{this.state.searchQueryHttp}
-							</Text>
-						</TouchableHighlight>	
+						<Text style={styles.textLarge}>
+							{this.state.searchQueryHttp}
+						</Text>
 					</View>						
 					<View>
-						<TouchableHighlight
-							underlayColor='#ddd'
-						>
-							<Text style={styles.textSmall}>
-							</Text>
-						</TouchableHighlight>	
+						<Text style={styles.textSmall}>
+						</Text>
 					</View>
 				</View>
 				
-                <View>
-                    <TextInput
-						underlineColorAndroid='rgba(0,0,0,0)'
-						onChangeText={this.onChangeText.bind(this)}
-						style={styles.textInput}
-						value={this.state.searchQuery}
-						placeholder="Search here">
-                    </TextInput>    			
-				</View>
+                <View style={styles.iconForm}>
+					<View>
+						<TextInput
+							underlineColorAndroid='rgba(0,0,0,0)'
+							onChangeText={this.onChangeText.bind(this)}
+							style={{
+								height: 45,
+								padding: 5,
+								backgroundColor: 'white',
+								borderWidth: 3,
+								borderColor: 'white',
+								borderRadius: 0,
+								width: this.state.width * .90,
+							}}
+							value={this.state.searchQuery}
+							placeholder="Search here">
+						</TextInput>
+					</View>
+					<View style={{
+						height: 45,
+						backgroundColor: 'white',
+						borderWidth: 3,
+						borderColor: 'white',
+						marginLeft: -10,
+						paddingLeft: 5,
+						width: this.state.width * .10,
+					}}>			
+						<TouchableWithoutFeedback
+							onPress={() => this.clearSearchQuery()}
+						>			
+							<View>					
+								{image}
+							</View>
+						</TouchableWithoutFeedback>
+					</View>
+                </View>
 				
 				{errorCtrl}
 
                 {loader}
 
-                <ScrollView
-                    onScroll={this.refreshData.bind(this)} scrollEventThrottle={16}>
-                    <ListView
+				<ScrollView onScroll={this.refreshData.bind(this)} scrollEventThrottle={16}
+					refreshControl={
+						<RefreshControl
+							enabled={true}
+							refreshing={this.state.refreshing}
+							onRefresh={this.refreshDataAndroid.bind(this)}
+						/>
+					}
+				>
+					<ListView
 						enableEmptySections={true}
-                        style={{marginTop: 0, marginBottom: 0}}
-                        dataSource={this.state.dataSource}
-                        renderRow={this.renderRow.bind(this)}
-                    />
-                </ScrollView>
+						dataSource={this.state.dataSource}
+						renderRow={this.renderRow.bind(this)}
+					/>
+				</ScrollView>
 
 				<View>
 					<Text style={styles.countFooter}>
@@ -284,6 +347,11 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         backgroundColor: '#fff'
     },
+	iconForm: {
+		flexDirection: 'row',
+		borderColor: 'lightgray',
+		borderWidth: 3
+	},
     countHeader: {
         fontSize: 16,
         textAlign: 'center',

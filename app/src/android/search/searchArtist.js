@@ -5,19 +5,22 @@ import {
     StyleSheet,
     Text,
     View,
-    Image,
     TouchableHighlight,
+	TouchableWithoutFeedback,
     ListView,
     ScrollView,
     ActivityIndicator,
     TextInput,
-	BackAndroid
+	BackAndroid,
+	Image,
+	Dimensions,
+	RefreshControl	
 } from 'react-native';
 
-class SearchIMDB extends Component {
+class SearchArtist extends Component {
     constructor(props) {
         super(props);
-
+		
 		BackAndroid.addEventListener('hardwareBackPress', () => {
 			if (this.props.navigator) {
 				this.props.navigator.pop();
@@ -30,28 +33,44 @@ class SearchIMDB extends Component {
         });
 
 		this.state = {
-			dataSource: ds.cloneWithRows([])
-		}
-
+			dataSource: ds.cloneWithRows([]),
+			searchQuery: ''
+		}	
+		
 		if (props.data) {
-			this.state = {
+			this.state = {			
 				dataSource: ds.cloneWithRows([]),
 				searchQueryHttp: props.data.searchQuery,
 				showProgress: true,
 				resultsCount: 0,
 				recordsCount: 5,
-				positionY: 0
+				positionY: 0,
+				searchQuery: '',
+				refreshing: false
 			}
-		};
+        };
+ 
+    }
+
+    componentDidMount() {
+		this.setState({
+            width: Dimensions.get('window').width
+        });
+        this.getItems();
     }
 	
-	componentDidMount() {
-		this.getMovies();
-	}
-	
-    getMovies() {
-        fetch('http://www.omdbapi.com/?t='
-            + this.state.searchQueryHttp + '&plot=full', {
+    getItems() {
+		this.setState({
+			serverError: false,
+            resultsCount: 0,
+            recordsCount: 15,
+            positionY: 0,
+			searchQuery: ''
+        });
+		
+        fetch('https://api.spotify.com/v1/search?q=' 
+			+ this.state.searchQueryHttp +
+			'&type=artist&limit=50', {
             method: 'get',
             headers: {
                 'Accept': 'application/json',
@@ -60,26 +79,17 @@ class SearchIMDB extends Component {
         })
             .then((response)=> response.json())
             .then((responseData)=> {
-                if (responseData.Response == 'False') {
-                    var arr = [];
-                } else {
-                    var arr = [];
-                    arr.push(responseData);
-                    arr[0].pic = responseData.Poster;
-                    arr[0].trackName = responseData.Title;
-                    arr[0].releaseDate = responseData.Year;
-                    arr[0].country = responseData.Country;
-                    arr[0].primaryGenreName = responseData.Genre;
-                    arr[0].artistName = responseData.Director;
-                    arr[0].longDescription = responseData.Plot;
-                }
+				let items = responseData.artists.items;
+				
                 this.setState({
-                    dataSource: this.state.dataSource.cloneWithRows(arr),
-                    resultsCount: arr.length,
-                    responseData: arr
+                    dataSource: this.state.dataSource.cloneWithRows(items),
+                    resultsCount: items.length,
+                    responseData: items,
+                    filteredItems: items,
+					refreshing: false
                 });
             })
-            .catch((error)=> {	
+            .catch((error)=> {
                 this.setState({
                     serverError: true
                 });
@@ -90,40 +100,49 @@ class SearchIMDB extends Component {
                 });
             });
     }
-
+	
     pressRow(rowData) {
 		this.props.navigator.push({
-			index: 2,
+			index: 3,
 			data: rowData
 		});
     }
-
+	
     renderRow(rowData) {
+		var image;
+
+        if (rowData.images[2]) {
+            image = <Image
+				source={{uri: rowData.images[2].url}}
+				style={styles.img}
+			/>
+        } else {
+			image = <Image
+				source={require('../../../img/no_image.jpg')}
+				style={styles.img}
+			/>
+		}
+		
         return (
             <TouchableHighlight
                 onPress={()=> this.pressRow(rowData)}
                 underlayColor='#ddd'
             >
                 <View style={styles.imgsList}>
-                    <Image
-                        source={{uri: rowData.pic}}
-                        style={styles.img}
-                    />
+ 
+					{image}
+ 
                     <View style={styles.textBlock}>
                         <Text style={styles.textItemBold}>
-							{rowData.trackName}
+							{rowData.name}
+						</Text>                        
+						
+						<Text style={styles.textItem}>
+							Followers: {rowData.followers.total}
 						</Text>
-                        <Text style={styles.textItem}>
-							{rowData.releaseDate.split('-')[0]}
-						</Text>
-                        <Text style={styles.textItem}>
-							{rowData.country}
-						</Text>
-                        <Text style={styles.textItem}>
-							{rowData.primaryGenreName}
-						</Text>
-                        <Text style={styles.textItem}>
-							{rowData.artistName}
+						
+						<Text style={styles.textItem}>
+							{rowData.genres.slice(0, 3)}
 						</Text>
                     </View>
                 </View>
@@ -132,37 +151,24 @@ class SearchIMDB extends Component {
     }
 
     refreshData(event) {
-        if (this.state.showProgress == true) {
+        if (this.state.showProgress === true) {
             return;
         }
 
-        if (event.nativeEvent.contentOffset.y <= -150) {
-
-            this.setState({
-                showProgress: true,
-                resultsCount: 0,
-                recordsCount: 5,
-                positionY: 0,
-                searchQuery: ''
-            });
-            setTimeout(() => {
-                this.getMovies()
-            }, 500);
-        }
-
-        if (this.state.filteredItems == undefined) {
+        if (this.state.filteredItems === undefined) {
             return;
         }
 
-        var recordsCount = this.state.recordsCount;
-        var positionY = this.state.positionY;
-        var items = this.state.filteredItems.slice(0, recordsCount);
+        let items, positionY, recordsCount;
+        recordsCount = this.state.recordsCount;
+        positionY = this.state.positionY;
+        items = this.state.filteredItems.slice(0, recordsCount);
 
-        if (event.nativeEvent.contentOffset.y >= positionY - 110) {
+        if (event.nativeEvent.contentOffset.y >= positionY) {
             this.setState({
                 dataSource: this.state.dataSource.cloneWithRows(items),
-                recordsCount: recordsCount + 3,
-                positionY: positionY + 380
+                recordsCount: recordsCount + 10,
+                positionY: positionY + 400
             });
         }
     }
@@ -172,7 +178,7 @@ class SearchIMDB extends Component {
             return;
         }
         var arr = [].concat(this.state.responseData);
-        var items = arr.filter((el) => el.trackName.toLowerCase().indexOf(text.toLowerCase()) >= 0);
+        var items = arr.filter((el) => el.name.toLowerCase().indexOf(text.toLowerCase()) >= 0);
         this.setState({
             dataSource: this.state.dataSource.cloneWithRows(items),
             resultsCount: items.length,
@@ -180,13 +186,33 @@ class SearchIMDB extends Component {
             searchQuery: text
         })
     }
+
+    refreshDataAndroid() {
+        this.setState({
+            showProgress: true,
+            resultsCount: 0
+        });
+
+        this.getItems();
+    }
 	
     goBack(rowData) {
 		this.props.navigator.pop();
 	}
+
+    clearSearchQuery() {
+        this.setState({
+            dataSource: this.state.dataSource.cloneWithRows(this.state.responseData.slice(0, 15)),
+            resultsCount: this.state.responseData.length,
+            filteredItems: this.state.responseData,
+            positionY: 0,
+            recordsCount: 15,
+            searchQuery: ''
+        });
+    }
 	
     render() {
-        var errorCtrl, loader;
+        let errorCtrl, loader, image;
 
         if (this.state.serverError) {
             errorCtrl = <Text style={styles.error}>
@@ -195,15 +221,24 @@ class SearchIMDB extends Component {
         }
 
         if (this.state.showProgress) {
-            loader = <View style={{
-                justifyContent: 'center',
-                height: 100
-            }}>
+            loader = <View style={styles.loader}>
                 <ActivityIndicator
                     size="large"
-                    animating={true}/>
+                    animating={true}
+                />
             </View>;
         }
+
+		if (this.state.searchQuery.length > 0) {
+			image = <Image
+				source={require('../../../img/cancel.png')}
+				style={{
+					height: 20,
+					width: 20,
+					marginTop: 10
+				}}
+			/>;
+		}
 
         return (
             <View style={styles.container}>
@@ -211,7 +246,7 @@ class SearchIMDB extends Component {
 					<View>
 						<TouchableHighlight
 							onPress={()=> this.goBack()}
-							underlayColor='#ddd'
+							underlayColor='#48BBEC'
 						>
 							<Text style={styles.textSmall}>
 								Back
@@ -219,47 +254,72 @@ class SearchIMDB extends Component {
 						</TouchableHighlight>	
 					</View>
 					<View style={styles.itemWrap}>
-						<TouchableHighlight
-							underlayColor='#ddd'
-						>
-							<Text style={styles.textLarge}>
-								{this.state.searchQueryHttp}
-							</Text>
-						</TouchableHighlight>	
+						<Text style={styles.textLarge}>
+							{this.state.searchQueryHttp}
+						</Text>
 					</View>						
 					<View>
-						<TouchableHighlight
-							underlayColor='#ddd'
-						>
-							<Text style={styles.textSmall}>
-							</Text>
-						</TouchableHighlight>	
+						<Text style={styles.textSmall}>
+						</Text>
 					</View>
 				</View>
 				
-                <View>
-                    <TextInput
-						underlineColorAndroid='rgba(0,0,0,0)'
-						onChangeText={this.onChangeText.bind(this)}
-						style={styles.textInput}
-						value={this.state.searchQuery}
-						placeholder="Search here">
-                    </TextInput>    			
-				</View>
+                <View style={styles.iconForm}>
+					<View>
+						<TextInput
+							underlineColorAndroid='rgba(0,0,0,0)'
+							onChangeText={this.onChangeText.bind(this)}
+							style={{
+								height: 45,
+								padding: 5,
+								backgroundColor: 'white',
+								borderWidth: 3,
+								borderColor: 'white',
+								borderRadius: 0,
+								width: this.state.width * .90,
+							}}
+							value={this.state.searchQuery}
+							placeholder="Search here">
+						</TextInput>
+					</View>
+					<View style={{
+						height: 45,
+						backgroundColor: 'white',
+						borderWidth: 3,
+						borderColor: 'white',
+						marginLeft: -10,
+						paddingLeft: 5,
+						width: this.state.width * .10,
+					}}>			
+						<TouchableWithoutFeedback
+							onPress={() => this.clearSearchQuery()}
+						>			
+							<View>					
+								{image}
+							</View>
+						</TouchableWithoutFeedback>
+					</View>
+                </View>
 				
 				{errorCtrl}
 
                 {loader}
 
-                <ScrollView
-                    onScroll={this.refreshData.bind(this)} scrollEventThrottle={16}>
-                    <ListView
+				<ScrollView onScroll={this.refreshData.bind(this)} scrollEventThrottle={16}
+					refreshControl={
+						<RefreshControl
+							enabled={true}
+							refreshing={this.state.refreshing}
+							onRefresh={this.refreshDataAndroid.bind(this)}
+						/>
+					}
+				>
+					<ListView
 						enableEmptySections={true}
-                        style={{marginTop: 0, marginBottom: 0}}
-                        dataSource={this.state.dataSource}
-                        renderRow={this.renderRow.bind(this)}
-                    />
-                </ScrollView>
+						dataSource={this.state.dataSource}
+						renderRow={this.renderRow.bind(this)}
+					/>
+				</ScrollView>
 
 				<View>
 					<Text style={styles.countFooter}>
@@ -271,7 +331,6 @@ class SearchIMDB extends Component {
     }
 }
 
-
 const styles = StyleSheet.create({
     imgsList: {
         flex: 1,
@@ -282,6 +341,11 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         backgroundColor: '#fff'
     },
+	iconForm: {
+		flexDirection: 'row',
+		borderColor: 'lightgray',
+		borderWidth: 3
+	},
     countHeader: {
         fontSize: 16,
         textAlign: 'center',
@@ -290,9 +354,9 @@ const styles = StyleSheet.create({
     },
     img: {
         height: 95,
-        width: 75,
+        width: 90,
         borderRadius: 10,
-        margin: 20
+        margin: 10
     },    
 	textBlock: {
 		flex: 1,
@@ -381,4 +445,4 @@ const styles = StyleSheet.create({
     }
 });
 
-export default SearchIMDB;
+export default SearchArtist;

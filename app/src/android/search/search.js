@@ -102,7 +102,6 @@ class Search extends Component {
 						>
                             <View>
                                 <Text style={styles.textSmall}>
-                                    Back
                                 </Text>
                             </View>
                         </TouchableHighlight>
@@ -211,7 +210,7 @@ const styles = StyleSheet.create({
         fontSize: 20,
         textAlign: 'center',
         margin: 10,
-        marginRight: 20,
+        paddingLeft: 40,
         fontWeight: 'bold',
         color: 'white'
     },
