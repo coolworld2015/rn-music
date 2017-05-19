@@ -43,7 +43,7 @@ class SearchDetails extends Component {
 		}	
     }
 	
-	localStorageInsert() {
+	addItem() {
         var movies = [];
 
         AsyncStorage.getItem('rn-movies.movies')
@@ -96,7 +96,7 @@ class SearchDetails extends Component {
 					<View>
 						<TouchableHighlight
 							onPress={()=> this.goBack()}
-							underlayColor='#ddd'
+							underlayColor='#48BBEC'
 						>
 							<Text style={styles.textSmall}>
 								Back
@@ -114,8 +114,8 @@ class SearchDetails extends Component {
 					</View>						
 					<View>
 						<TouchableHighlight
-							onPress={()=> this.localStorageInsert()}
-							underlayColor='#ddd'
+							onPress={()=> this.addItem()}
+							underlayColor='#48BBEC'
 						>
 							<Text style={styles.textSmall}>
 								Add
@@ -151,7 +151,7 @@ class SearchDetails extends Component {
 						</Text>
 
 						<TouchableHighlight
-							onPress={()=> this.localStorageInsert()}
+							onPress={()=> this.addItem()}
 							style={styles.button}>
 							<Text style={styles.buttonText}>
 								Add to favorites

@@ -109,7 +109,7 @@ class MoviesDetails extends Component {
 					<View>
 						<TouchableHighlight
 							onPress={()=> this.goBack()}
-							underlayColor='#ddd'
+							underlayColor='#48BBEC'
 						>
 							<Text style={styles.textSmall}>
 								Back
@@ -128,7 +128,7 @@ class MoviesDetails extends Component {
 					<View>
 						<TouchableHighlight
 							onPress={()=> this.deleteMovieDialog()}
-							underlayColor='#ddd'
+							underlayColor='#48BBEC'
 						>
 							<Text style={styles.textSmall}>
 								Delete
