@@ -105,7 +105,8 @@ class SearchTrack extends Component {
 			name: rowData.name,
 			image: rowData.album.images[1].url,
 			artist: rowData.artists[0].name,
-			album: rowData.album.name
+			album: rowData.album.name,
+			duration: (+(rowData.duration_ms)/1000/60).toFixed(2) + ' secs'
 		};
 		
 		this.props.navigator.push({
@@ -149,6 +150,10 @@ class SearchTrack extends Component {
 						
 						<Text style={styles.textItem}>
 							{rowData.album.name}
+						</Text>
+												
+						<Text style={styles.textItem}>
+							{(+(rowData.duration_ms)/1000/60).toFixed(2)  + ' secs'}
 						</Text>	
                     </View>
                 </View>

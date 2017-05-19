@@ -147,7 +147,7 @@ class Movies extends Component {
 						</Text>
 						
 						<Text style={styles.textItem}>
-							{rowData.trackId}
+							{rowData.duration}
 						</Text>	
                     </View>
                 </View>
@@ -364,9 +364,9 @@ const styles = StyleSheet.create({
     },
     img: {
         height: 95,
-        width: 75,
+        width: 90,
         borderRadius: 10,
-        margin: 20
+        margin: 10
     },    
 	textBlock: {
 		flex: 1,

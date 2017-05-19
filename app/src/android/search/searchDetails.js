@@ -30,7 +30,8 @@ class SearchDetails extends Component {
 		this.state = {
 			name: '',
 			artist: '',
-			album: ''
+			album: '',
+			duration: ''
 		};
 		
 		if (props.data) {
@@ -38,13 +39,14 @@ class SearchDetails extends Component {
 				name: props.data.name,
 				image: props.data.image,
 				artist: props.data.artist,
-				album: props.data.album
+				album: props.data.album,
+				duration: props.data.duration
 			};
 		}	
     }
 	
 	addItem() {
-        var movies = [];
+        let movies = [];
 
         AsyncStorage.getItem('rn-movies.movies')
             .then(req => JSON.parse(req))
@@ -55,7 +57,8 @@ class SearchDetails extends Component {
 					name: this.state.name,
 					image: this.state.image,
 					artist: this.state.artist,
-					album: this.state.album
+					album: this.state.album,
+					duration: this.state.duration
 				});
 
                 if (movies[0] == null) {
@@ -148,6 +151,10 @@ class SearchDetails extends Component {
 						
 						<Text style={styles.itemText}>
 							{this.state.album}
+						</Text>
+						
+						<Text style={styles.itemText}>
+							{this.state.duration}
 						</Text>
 
 						<TouchableHighlight

@@ -29,7 +29,8 @@ class MoviesDetails extends Component {
 		this.state = {
 			name: '',
 			artist: '',
-			album: ''
+			album: '',
+			duration: ''
 		};
 		
 		if (props.data) {
@@ -38,7 +39,8 @@ class MoviesDetails extends Component {
 				name: props.data.name,
 				image: props.data.image,
 				artist: props.data.artist,
-				album: props.data.album
+				album: props.data.album,
+				duration: props.data.duration
 			};
 		}	
     }
@@ -161,6 +163,10 @@ class MoviesDetails extends Component {
 						
 						<Text style={styles.itemText}>
 							{this.state.album}
+						</Text>
+						
+						<Text style={styles.itemText}>
+							{this.state.duration}
 						</Text>
 
 						<TouchableHighlight
