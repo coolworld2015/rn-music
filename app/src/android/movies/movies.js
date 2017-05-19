@@ -107,7 +107,8 @@ class Movies extends Component {
 			name: rowData.name,
 			image: rowData.image,
 			artist: rowData.artist,
-			album: rowData.album
+			album: rowData.album,
+			duration: rowData.duration
 		};
 		
 		this.props.navigator.push({
