@@ -126,27 +126,8 @@ class SearchTopTrack extends Component {
 						</Text>
 						
 						<Text style={styles.textItemBold}>
-							{rowData.preview_url}
-						</Text>				
-						
-						<Text style={styles.textItemBold}>
- 
+							{rowData.album.name}
 						</Text>
-						
-						{/*
-                        <Text style={styles.textItem}>
-							{rowData.releaseDate.split('-')[0]}
-						</Text>
-                        <Text style={styles.textItem}>
-							{rowData.country}
-						</Text>
-                        <Text style={styles.textItem}>
-							{rowData.primaryGenreName}
-						</Text>
-                        <Text style={styles.textItem}>
-							{rowData.artistName}
-						</Text>
-						*/}
                     </View>
                 </View>
             </TouchableHighlight>

@@ -121,22 +121,12 @@ class SearchResults extends Component {
 						</Text>                        
 						
 						<Text style={styles.textItemBold}>
-							{rowData.followers.total}
+							Followers: {rowData.followers.total}
 						</Text>
-						{/*
-                        <Text style={styles.textItem}>
-							{rowData.releaseDate.split('-')[0]}
+						
+						<Text style={styles.textItemBold}>
+							{rowData.genres.slice(0, 3)}
 						</Text>
-                        <Text style={styles.textItem}>
-							{rowData.country}
-						</Text>
-                        <Text style={styles.textItem}>
-							{rowData.primaryGenreName}
-						</Text>
-                        <Text style={styles.textItem}>
-							{rowData.artistName}
-						</Text>
-						*/}
                     </View>
                 </View>
             </TouchableHighlight>
