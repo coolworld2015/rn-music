@@ -10,13 +10,12 @@ import {
     ListView,
     ScrollView,
     ActivityIndicator,
-    TextInput,
     AsyncStorage,
     Alert,
 	BackAndroid
 } from 'react-native';
 
-class SearchDetails extends Component {
+class MoviesDetails extends Component {
     constructor(props) {
         super(props);
 		
@@ -25,7 +24,7 @@ class SearchDetails extends Component {
 				this.props.navigator.pop();
 			}
 			return true;
-		});
+		});	
 		
 		this.state = {
 			name: '',
@@ -35,6 +34,7 @@ class SearchDetails extends Component {
 		
 		if (props.data) {
 			this.state = {
+				trackId: props.data.trackId,
 				name: props.data.name,
 				image: props.data.image,
 				artist: props.data.artist,
@@ -43,36 +43,49 @@ class SearchDetails extends Component {
 		}	
     }
 	
-	localStorageInsert() {
-        var movies = [];
-
-        AsyncStorage.getItem('rn-movies.movies')
-            .then(req => JSON.parse(req))
-            .then(json => {
-                movies = [].concat(json);
-                movies.push({
-					trackId: + new Date,
-					name: this.state.name,
-					image: this.state.image,
-					artist: this.state.artist,
-					album: this.state.album
-				});
-
-                if (movies[0] == null) {
-                    movies.shift()
-                } // Hack !!!
-
-                AsyncStorage.setItem('rn-movies.movies', JSON.stringify(movies))
-                    .then(json => {
-                            appConfig.movies.refresh = true;
-                            this.props.navigator.pop();
-                        }
-                    );
-
-            })
-            .catch(error => console.log(error));
-    }
+    deleteMovieDialog() {
+		Alert.alert(
+			'Delete track',
+			'Are you sure you want to delete track ' + this.state.name + '?',
+			[
+				{text: 'Cancel', onPress: () => console.log('Cancel Pressed!')},
+				{
+					text: 'OK', onPress: () => {
+					this.deleteMovie();
+					}
+				},
+			]
+		);	
+	}
 	
+	deleteMovie(id) {
+		var id = this.state.trackId;
+		var movies = [];
+
+		AsyncStorage.getItem('rn-movies.movies')
+			.then(req => JSON.parse(req))
+			.then(json => {
+
+				movies = [].concat(json);
+
+				for (var i = 0; i < movies.length; i++) {
+					if (movies[i].trackId == id) {
+						movies.splice(i, 1);
+						break;
+					}
+				}
+
+				AsyncStorage.setItem('rn-movies.movies', JSON.stringify(movies))
+					.then(json => {
+							appConfig.movies.refresh = true;
+							this.props.navigator.pop();
+						}
+					);
+
+			})
+			.catch(error => console.log(error))
+	}
+		
 	goBack() {
 		this.props.navigator.pop();
 	}
@@ -114,11 +127,11 @@ class SearchDetails extends Component {
 					</View>						
 					<View>
 						<TouchableHighlight
-							onPress={()=> this.localStorageInsert()}
+							onPress={()=> this.deleteMovieDialog()}
 							underlayColor='#ddd'
 						>
 							<Text style={styles.textSmall}>
-								Add
+								Delete
 							</Text>
 						</TouchableHighlight>	
 					</View>
@@ -151,10 +164,10 @@ class SearchDetails extends Component {
 						</Text>
 
 						<TouchableHighlight
-							onPress={()=> this.localStorageInsert()}
+							onPress={()=> this.goBack()}
 							style={styles.button}>
 							<Text style={styles.buttonText}>
-								Add to favorites
+								Back
 							</Text>
 						</TouchableHighlight>
 						
@@ -211,8 +224,8 @@ const styles = StyleSheet.create({
         margin: 5,
         fontWeight: 'bold',
 		color: 'black'
-    },
-    itemText: {
+    },  
+	itemText: {
         fontSize: 14,
         textAlign: 'center',
         margin: 3,
@@ -244,4 +257,4 @@ const styles = StyleSheet.create({
     }
 });
 
-export default SearchDetails;
+export default MoviesDetails;

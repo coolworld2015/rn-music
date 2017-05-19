@@ -10,6 +10,9 @@ import SearchDetails from '../search/searchDetails';
 import SearchTopTrack from '../search/searchTopTrack';
 import SearchTrack from '../search/searchTrack';
 
+import Movies from '../movies/movies';
+import MoviesDetails from '../movies/moviesDetails';
+
 class AppContainer extends Component {
     constructor(props) {
         super(props);
@@ -20,11 +23,44 @@ class AppContainer extends Component {
             <ScrollableTabView
                 renderTabBar={() => <DefaultTabBar backgroundColor='white'/>}
             >
+                <MoviesTab tabLabel="Tracks"/>
                 <SearchTab tabLabel="Search"/>
-                <Logout tabLabel="Tracks"/>
             </ScrollableTabView>
         );
     }
+}
+
+class MoviesTab extends Component {
+	constructor(props) {
+		super(props);
+		this.routes = [
+			{title: 'Movies', index: 0},
+			{title: 'Movies Details', index: 1}
+		];
+	}
+		  
+	renderScene(route, navigator) {
+		switch (route.index) {
+			case 0: return <Movies routes={this.routes} navigator={navigator} />
+					break;			
+			case 1: return <MoviesDetails data={route.data} routes={this.routes} navigator={navigator} />
+					break
+ 		}
+ 	}	
+	
+	render() {
+		return (
+	  		<NavigationExperimental.Navigator
+				initialRoute={this.routes[0]}
+				initialRouteStack={this.routes}
+				renderScene={this.renderScene.bind(this)}
+				style={{padding: 0}}
+			  
+				configureScene={(route, routeStack) =>
+					NavigationExperimental.Navigator.SceneConfigs.PushFromRight}
+			/>
+		)
+	}
 }
 
 class Logout extends Component {

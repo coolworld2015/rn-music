@@ -29,12 +29,9 @@ class App extends Component {
             access_token: '',
 			url: 'http://jwt-base.herokuapp.com/',
 			onLogOut: this.onLogOut.bind(this),
-			users: {
+            movies: {
                 refresh: false
-            },
-			phones: {
-                refresh: false
-            }	
+            }
         };		
     }
 
