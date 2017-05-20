@@ -31,7 +31,8 @@ class SearchDetails extends Component {
 			name: '',
 			artist: '',
 			album: '',
-			duration: ''
+			duration: '',
+			url: ''
 		};
 		
 		if (props.data) {
@@ -40,7 +41,8 @@ class SearchDetails extends Component {
 				image: props.data.image,
 				artist: props.data.artist,
 				album: props.data.album,
-				duration: props.data.duration
+				duration: props.data.duration,
+				url: props.data.url
 			};
 		}	
     }
@@ -58,7 +60,8 @@ class SearchDetails extends Component {
 					image: this.state.image,
 					artist: this.state.artist,
 					album: this.state.album,
-					duration: this.state.duration
+					duration: this.state.duration,
+					url: this.state.url
 				});
 
                 if (movies[0] == null) {
@@ -74,6 +77,15 @@ class SearchDetails extends Component {
 
             })
             .catch(error => console.log(error));
+    }
+	
+    playTrack() {
+		this.props.navigator.push({
+			index: 5,
+			data: {
+				url: this.state.url
+			}
+		});
     }
 	
 	goBack() {
@@ -156,12 +168,16 @@ class SearchDetails extends Component {
 						<Text style={styles.itemText}>
 							{this.state.duration}
 						</Text>
+						
+						<Text style={styles.itemText}>
+							{this.state.url}
+						</Text>
 
 						<TouchableHighlight
-							onPress={()=> this.addItem()}
+							onPress={()=> this.playTrack()}
 							style={styles.button}>
 							<Text style={styles.buttonText}>
-								Add to favorites
+								Play track
 							</Text>
 						</TouchableHighlight>
 						

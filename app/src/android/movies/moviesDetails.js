@@ -40,7 +40,8 @@ class MoviesDetails extends Component {
 				image: props.data.image,
 				artist: props.data.artist,
 				album: props.data.album,
-				duration: props.data.duration
+				duration: props.data.duration,
+				url: props.data.url
 			};
 		}	
     }
@@ -87,7 +88,16 @@ class MoviesDetails extends Component {
 			})
 			.catch(error => console.log(error))
 	}
-		
+	
+    playTrack() {
+		this.props.navigator.push({
+			index: 2,
+			data: {
+				url: this.state.url
+			}
+		});
+    }
+	
 	goBack() {
 		this.props.navigator.pop();
 	}
@@ -168,12 +178,16 @@ class MoviesDetails extends Component {
 						<Text style={styles.itemText}>
 							{this.state.duration}
 						</Text>
-
+						
+						<Text style={styles.itemText}>
+							{this.state.url}
+						</Text>
+						
 						<TouchableHighlight
-							onPress={()=> this.goBack()}
+							onPress={()=> this.playTrack()}
 							style={styles.button}>
 							<Text style={styles.buttonText}>
-								Back
+								Play track
 							</Text>
 						</TouchableHighlight>
 						

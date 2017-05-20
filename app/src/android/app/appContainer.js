@@ -13,6 +13,8 @@ import SearchTrack from '../search/searchTrack';
 import Movies from '../movies/movies';
 import MoviesDetails from '../movies/moviesDetails';
 
+import PlayTrack from './playTrack';
+
 class AppContainer extends Component {
     constructor(props) {
         super(props);
@@ -35,7 +37,8 @@ class MoviesTab extends Component {
 		super(props);
 		this.routes = [
 			{title: 'Movies', index: 0},
-			{title: 'Movies Details', index: 1}
+			{title: 'Movies Details', index: 1},
+			{title: 'Web', index: 2}
 		];
 	}
 		  
@@ -44,7 +47,9 @@ class MoviesTab extends Component {
 			case 0: return <Movies routes={this.routes} navigator={navigator} />
 					break;			
 			case 1: return <MoviesDetails data={route.data} routes={this.routes} navigator={navigator} />
-					break
+					break;			
+			case 2: return <PlayTrack data={route.data} routes={this.routes} navigator={navigator} />
+					break;
  		}
  	}	
 	
@@ -83,7 +88,8 @@ class SearchTab extends Component {
 			{title: 'Search Artist', index: 1},
 			{title: 'Search Details', index: 2},
 			{title: 'Search Top Track', index: 3},
-			{title: 'Search Track', index: 4}
+			{title: 'Search Track', index: 4},
+			{title: 'Play Track', index: 5}
 		];
 	}
 		  
@@ -98,7 +104,9 @@ class SearchTab extends Component {
 			case 3: return <SearchTopTrack data={route.data} routes={this.routes} navigator={navigator} />
 					break;
 			case 4: return <SearchTrack data={route.data} routes={this.routes} navigator={navigator} />
-					break
+					break;
+			case 5: return <PlayTrack data={route.data} routes={this.routes} navigator={navigator} />
+					break;					
  		}
  	}
 

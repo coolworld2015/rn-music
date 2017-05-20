@@ -106,7 +106,8 @@ class SearchTrack extends Component {
 			image: rowData.album.images[1].url,
 			artist: rowData.artists[0].name,
 			album: rowData.album.name,
-			duration: (+(rowData.duration_ms)/1000/60).toFixed(2) + ' secs'
+			duration: (+(rowData.duration_ms)/1000/60).toFixed(2) + ' secs',
+			url: rowData.preview_url
 		};
 		
 		this.props.navigator.push({
