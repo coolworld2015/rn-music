@@ -43,7 +43,7 @@ class SearchTrack extends Component {
 				searchQueryHttp: props.data.searchQuery,
 				showProgress: true,
 				resultsCount: 0,
-				recordsCount: 5,
+				recordsCount: 15,
 				positionY: 0,
 				searchQuery: '',
 				refreshing: false
@@ -82,7 +82,7 @@ class SearchTrack extends Component {
 				let items = responseData.tracks.items;
 				
                 this.setState({
-                    dataSource: this.state.dataSource.cloneWithRows(items),
+                    dataSource: this.state.dataSource.cloneWithRows(items.sort(this.sort).slice(0, 15)),
                     resultsCount: items.length,
                     responseData: items,
                     filteredItems: items

@@ -30,7 +30,7 @@ class Movies extends Component {
             dataSource: ds.cloneWithRows([]),
             showProgress: true,
             resultsCount: 0,
-            recordsCount: 5,
+            recordsCount: 15,
             positionY: 0,
 			searchQuery: '',
 			refreshing: false
@@ -72,9 +72,8 @@ class Movies extends Component {
             .then(req => JSON.parse(req))
             .then(json => {
 				if (json) {
-					console.log(json)
 					this.setState({
-						dataSource: this.state.dataSource.cloneWithRows(json.sort(this.sort).slice(0, 5)),
+						dataSource: this.state.dataSource.cloneWithRows(json.sort(this.sort).slice(0, 15)),
 						resultsCount: json.length,
 						responseData: json.sort(this.sort),
 						filteredItems: json.sort(this.sort),
