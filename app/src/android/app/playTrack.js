@@ -16,7 +16,7 @@ class PlayTrack extends Component {
 		if (props.data) {
 			this.state = {
 				url: props.data.url,
-				html: 'https://p.scdn.co/mp3-preview/bc8b828e25f52b7ce6b29837870f9c0beec7fe15?cid=null'
+				html: 'https://www.facebook.com/wikrcom/videos/1118835278260392/'
 			}
 		}
     }

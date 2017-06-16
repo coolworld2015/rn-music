@@ -14,6 +14,7 @@ import Movies from '../movies/movies';
 import MoviesDetails from '../movies/moviesDetails';
 
 import PlayTrack from './playTrack';
+import Wikr from '../movies/wikr';
 
 class AppContainer extends Component {
     constructor(props) {
@@ -25,11 +26,45 @@ class AppContainer extends Component {
             <ScrollableTabView
                 renderTabBar={() => <DefaultTabBar backgroundColor='white'/>}
             >
-                <MoviesTab tabLabel="Tracks"/>
                 <SearchTab tabLabel="Search"/>
+                <MoviesTab tabLabel="Tracks"/>
+                <WikrTab tabLabel="Wikr"/>
             </ScrollableTabView>
         );
     }
+}
+
+class WikrTab extends Component {
+	constructor(props) {
+		super(props);
+		this.routes = [
+			{title: 'Wikr', index: 0},
+			{title: 'Web', index: 1}
+		];
+	}
+		  
+	renderScene(route, navigator) {
+		switch (route.index) {
+			case 0: return <Wikr routes={this.routes} navigator={navigator} />
+					break;					
+			case 1: return <PlayTrack data={route.data} routes={this.routes} navigator={navigator} />
+					break;
+ 		}
+ 	}	
+	
+	render() {
+		return (
+	  		<NavigationExperimental.Navigator
+				initialRoute={this.routes[0]}
+				initialRouteStack={this.routes}
+				renderScene={this.renderScene.bind(this)}
+				style={{padding: 0}}
+			  
+				configureScene={(route, routeStack) =>
+					NavigationExperimental.Navigator.SceneConfigs.PushFromRight}
+			/>
+		)
+	}
 }
 
 class MoviesTab extends Component {
