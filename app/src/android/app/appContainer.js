@@ -26,9 +26,8 @@ class AppContainer extends Component {
             <ScrollableTabView
                 renderTabBar={() => <DefaultTabBar backgroundColor='white'/>}
             >
-                <SearchTab tabLabel="Search"/>
                 <MoviesTab tabLabel="Tracks"/>
-                <WikrTab tabLabel="Wikr"/>
+                <SearchTab tabLabel="Search"/>
             </ScrollableTabView>
         );
     }
